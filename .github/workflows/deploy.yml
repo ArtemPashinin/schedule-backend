@@ -1,0 +1,49 @@
+name: Build and Deploy
+
+on:
+  push:
+    branches: [development]
+  workflow_dispatch:
+    inputs:
+      logLevel:
+        description: "Log level"
+        required: true
+        default: "warning"
+
+jobs:
+  build_development:
+    runs-on: ubuntu-latest
+    container: node:20
+
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Checkout development code
+        uses: actions/checkout@v2
+        with:
+          ref: development
+
+      - name: Build and Publish development to Github Packages Registry
+        uses: elgohr/Publish-Docker-Github-Action@master
+        with:
+          name: ghcr.io/mai-cosmos/schedule-backend
+          workdir: backend
+          dockerfile: Dockerfile
+          tags: latest
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+          registry: ghcr.io
+
+      - name: Send Telegram Notification
+        if: success()
+        run: |
+          MESSAGE="✅ Backend успешно собран и загружен в Github Packages."
+          TELEGRAM_BOT_TOKEN="7674748078:AAGpdQpgGIeYewOQkDG1qP7CjkgLgXujUoY"
+          TELEGRAM_CHAT_ID="6366591506"
+
+          curl -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+            -d "chat_id=${TELEGRAM_CHAT_ID}" \
+            -d "text=${MESSAGE}"
