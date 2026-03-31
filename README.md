@@ -1,26 +1,69 @@
-## Описание
+# MAI Schedule Backend
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## Краткое описание
+`MAI Schedule Backend` — это серверная часть Telegram-бота и API для мини-приложения, связанного с расписанием/событиями МАИ. Проект хранит пользователей и события, принимает подписки на события и помогает администраторам взаимодействовать с аудиторией через Telegram. 
 
-## Project setup
+## Зачем нужен проект
+Проект закрывает несколько практических задач:
+- единая точка для регистрации и обновления данных пользователей;
+- создание и хранение событий;
+- подписка пользователей на выбранные события;
+- поддержка коммуникации через Telegram (обращения в поддержку, рассылки, админские команды).
+
+## Что делает приложение
+### API-часть
+- `POST /user` — создать или обновить пользователя;
+- `POST /event` — создать событие;
+- `PUT /event/subscribe` — подписать пользователя на событие по названию.
+
+### Telegram-бот
+- поднимает bot runtime на базе `grammY`;
+- публикует команды и обрабатывает пользовательские/админские сценарии;
+- может создавать топики в Telegram-группе и пересылать сообщения;
+- отправляет ошибки в выделенный чат логов.
+
+## На базе чего работает
+- NestJS-приложение с модульной архитектурой (`UserModule`, `EventModule`, `BotModule`);
+- MongoDB как основное хранилище;
+- Mongoose-модели для работы с коллекциями;
+- Joi-валидация входящих DTO через кастомный `JoiValidationPipe`;
+- Telegram Bot API через `grammY` + `@grammyjs/runner`.
+
+## Технологический стек
+- **Язык:** TypeScript;
+- **Backend framework:** NestJS;
+- **База данных:** MongoDB;
+- **ODM:** Mongoose;
+- **Валидация:** Joi;
+- **Telegram SDK:** grammY;
+- **Контейнеризация (для окружения):** Docker / Docker Compose.
+
+## Запуск локально
+> Ниже базовый сценарий запуска backend-сервиса.
 
 ```bash
+cd backend
 npm install
+npm run start:dev
 ```
 
-## Compile and run the project
+По умолчанию сервис запускается на порту `3030`.
 
-```bash
-# development
-$ npm run start
+## Переменные окружения
+Минимально необходимые переменные:
+- `PORT` — порт приложения (по умолчанию `3030`);
+- `DB_CONNECT` — строка подключения к MongoDB;
+- `BOT_TOKEN` — токен Telegram-бота;
+- `MAIN_GROUP` — id основной Telegram-группы/форума;
+- `ERROR_LOG_CHAT_ID` — id чата для логов ошибок;
+- `WEBAPP_URL` — URL мини-приложения, открываемого из бота.
 
-# watch mode
-$ npm run start:dev
+## Docker-окружение
+В репозитории есть `configs/docker-compose.yml` с сервисами:
+- `app` (backend),
+- `mongo` (БД),
+- `mongo-express` (UI для БД),
+- `nextjs` (frontend).
 
-# production mode
-$ npm run start:prod
-```
-
-## Связь
-
-- Автор - [Артём Пашинин](https://t.me/ElectricPickle)
+## Контакты
+- Автор: [Артём Пашинин](https://t.me/ElectricPickle)
